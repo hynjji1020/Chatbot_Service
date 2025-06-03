@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Keyboard,
@@ -20,10 +21,19 @@ type Message = {
 };
 
 export default function ChatScreen() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
+      sender: "bot",
+      timestamp: new Date(),
+      text: `안녕하세요, 홍길동님.\n고객님의 건강 관리를 도와드릴 AI 건강 도우미 ‘건강이’입니다.\n불편하신 증상이나 통증 부위를 입력해 주세요. (예: 무릎이 아파요 / 어지러워요 등)\n\n고객님과 가까운 병원을 안내드리기 위해\n현재 거주 중이신 지역(동까지)을 입력해 주세요.\n\n🟩 증상: 무릎 통증\n📍 위치: 대전시 동구 가오동\n\n아래 병원을 추천드립니다:\n\n---\n\n🏥 **가오정형외과의원**\n🔬 진료과: 정형외과\n🚍 도보 약 7분 | 🚌 511번, 705번 버스 이용 가능\n\n🏥 **서울신경외과의원**\n🔬 진료과: 신경외과\n🚶 도보 약 12분 | 🚌 602번 버스 직행`,
+    },
+  ]);
+
   const [input, setInput] = useState("");
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const keyboardListener = Keyboard.addListener("keyboardDidShow", () => {
@@ -103,7 +113,16 @@ export default function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >
-      <Text style={styles.title}>건강이</Text>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backText}>← 뒤로</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>건강이</Text>
+        <View style={{ width: 60 }} />
+      </View>
 
       <ScrollView
         ref={scrollViewRef}
@@ -161,7 +180,6 @@ export default function ChatScreen() {
         })}
       </ScrollView>
 
-      {/* ✅ TTS 끄기/켜기 버튼 */}
       <View style={styles.ttsToggleContainer}>
         <TouchableOpacity
           style={styles.ttsButton}
@@ -196,11 +214,28 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingHorizontal: 16,
   },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  backButton: {
+    backgroundColor: "#007bff",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  backText: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "bold",
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 8,
     textAlign: "center",
+    flex: 1,
   },
   messagesContainer: {
     flex: 1,
